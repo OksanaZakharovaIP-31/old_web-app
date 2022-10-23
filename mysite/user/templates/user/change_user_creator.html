@@ -1,0 +1,89 @@
+{% extends "user/sample.html" %}
+{% load static %}
+{% block title %}
+Редактирование
+{% endblock %}
+
+{% block name %}
+<div class="dropdown" style="float:right;">
+<p  class="USER">
+    {% for name in user_name %}
+{{ name.name }} &nbsp;<img src="{{ name.photo.url }}" alt="no photo" width="40" height="40" >
+    {% endfor %}
+</p>
+
+    <div class="dropdown-content">
+        <a href="{% url 'change'  %}"> Редактировать </a>
+        <a href="{% url 'creator_vessels' %}"> Судна </a>
+        <a href="{% url 'creator_users' %}"> Пользователи </a>
+        <a href="{% url 'main' %}"> Выход </a>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+
+<div style="margin-left:45%; margin-top:2%">
+   <form action="" method="post" name="changeShip" id="changeShip">{% csrf_token %}
+                     {% for person_change in change %}
+       <label style="margin-left:-10%">Фамилия</label>&nbsp;
+                <input type="text" name="first_name_change_person" value="{{ person_change.first_name }}" required><br><br>
+       <label style="margin-left:-16%">Имя и Отчество</label>&nbsp;
+                <input  type="text" name="secondname_change_person" value="{{ person_change.second_name }}" required><br><br>
+                    <label style="margin-left:-5.3%">Тип</label>&nbsp;
+                     <select name="type_change_person">
+                         {% if person_change.type == 'admin' %}
+                         <option value="user">Логист</option>
+                        <option value="admin" selected>Админ</option>
+                         <option value="creator">Создатель</option>
+                         {% endif %}
+                         {% if person_change.type == 'user' %}
+                        <option value="user" selected>Логист</option>
+                        <option value="admin" >Админ</option>
+                         <option value="creator">Создатель</option>
+                         {% endif %}
+                         {% if person_change.type == 'creator' %}
+                        <option value="user" >Логист</option>
+                        <option value="admin" >Админ</option>
+                         <option value="creator"selected>Создатель</option>
+                         {% endif %}
+                    </select><br><br></form>
+                    <!-- Возможное изменение пароля -->
+                    <input type="text" id="result" name="result" form="changeShip" readonly style="margin-left:-1%">
+                    <button id="pass_start">Сгенерировать пароль</button> <br><br>
+                    <!-- Загрузка изображения -->
+                    <br><br>
+                        {% endfor %}
+       <button class="btn btn-primary" name="changeButton" type="submit" form="changeShip">Сохранить изменения</button>&nbsp;&nbsp;
+       <button name="close" type="submit" class="btn btn-secondary" form="changeShip">Назад</button>
+
+</div>
+<script>
+    let arr_num = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+let arr_en = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+let arr_EN = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+let arr_symb = ['!', '@', '#', '$', '%', '?', '-', '+', '=', '~'];
+const compareRandom = ( ) => Math.random() - 0.5;
+
+const randomInteger = ( min, max ) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
+function generatePassword() {
+    let arr = [];
+    arr = arr.concat(arr_num);
+    arr = arr.concat(arr_en);
+    arr = arr.concat(arr_EN);
+    arr = arr.concat(arr_symb);
+
+    arr.sort(compareRandom);
+
+    let password = '';
+    let passLenght = 10;
+
+    for (let i = 0; i < passLenght; i++) {
+        password += arr[randomInteger(0, arr.length - 1)];
+    }
+
+    document.querySelector('#result').value = password;
+}
+
+document.querySelector('#pass_start').addEventListener('click', generatePassword);
+</script>
+{% endblock %}

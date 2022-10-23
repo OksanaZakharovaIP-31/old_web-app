@@ -1,0 +1,209 @@
+{% extends "user/example_creator.html" %}
+{% load static %}
+
+{% block content %}
+<div  style="width:100%; margin-left: 60%">
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterUserModal">Фильтр</button>
+<div class="modal fade" id="filterUserModal" tabindex="-1" aria-labelledby="filterUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterUserModalLabel">Фильтр</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" align="center">
+                    <form action="" method="POST" id="filter_user"> {% csrf_token %}
+                        <input type="text" name="nameUserFilter" placeholder="Имя"><br><br>
+                    <select class="form-select" name="type_User_filter[]"  size="3" multiple>
+                        <option value="user">Логист</option>
+                        <option value="admin">Админ</option>
+                        <option value="creator">Создатель</option>
+                    </select>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary" form="filter_user" name="user_filter_button">Применить</button>
+                </div>
+        </div>
+    </div>
+</div>
+<!-- Поиск-->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#findUserModal" style="margin-left:30px">Поиск</button>
+<div class="modal fade" id="findUserModal" tabindex="-1" aria-labelledby="findModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="findUserModalLabel">Поиск</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" align="center">
+                    <form action="" METHOD="POST" id="find_user"> {% csrf_token %}
+                <input type="text" name="nameUserFind" placeholder="Имя"><br><br>
+                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary" form="find_user" name="Find_user_button">Применить</button>
+                </div>
+        </div>
+    </div>
+</div>
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal" style="margin-left:30px">Добавить пользователя</button>
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="findModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Новый пользователь</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" align="center">
+                    <form action="" name="add_users" method="post" id="add_users"> {% csrf_token %}
+                <input type="text" name="firstUserAdd" placeholder="Фамилия" required><br><br>
+                        <input type="text" name="secondnameUserAdd" placeholder="Имя и Отчество" required><br><br>
+                   <input type="text" name="loginUserAdd" placeholder="Login" required><br><br>
+                    <label >Тип</label>&nbsp;
+                     <select name="type_user_add"  required size="1">
+                         <option value="user">Логист</option>
+                        <option value="admin">Админ</option>
+                        <option value="creator">Создатель</option>
+                    </select><br><br>
+                    </form>
+                       <!--   Генерация пароля  -->
+                    <input type="text" id="result" name="result" form="add_users"  readonly required >
+                    <button id="pass_start">Сгенерировать пароль</button><br><br>
+                    <!-- Загрузка изображения -->
+                    <br><br>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary" form="add_users" name="add_user">Применить</button>
+                </div>
+        </div>
+    </div>
+</div>
+</div>
+<br><br>
+<div>
+    <table class="table table-bordered table-hover" border="2" style="background: #E6E6FA; margin-left: 35%; width:50%">
+        <caption align="top"  style="color: black">Список пользователей</caption>
+        <thead>
+        <tr><td>Логин</td><td>Тип</td><td>Имя</td><td>Фото</td></tr></thead><tbody>
+        {% for one_person in all_users_page %}
+        <tr>
+            <td>{{ one_person.login }}</td>
+            {% if  one_person.type == 'admin' %}
+            <td>Админ</td>
+            {% endif %}
+            {% if  one_person.type == 'user' %}
+            <td>Логист</td>
+            {% endif %}
+            {% if  one_person.type == 'creator' %}
+            <td>Создатель</td>
+            {% endif %}
+            <td>{{ one_person.name }}</td>
+            <td><img src="{{ one_person.photo.url }}" alt="no photo" width="150" height="150"></td>
+
+            <td><a href="change_user/{{ one_person.id }}">
+                Изменить</a></td>
+            <td>
+                <form onclick="return confirm('Вы точно хотите удалить запись из таблицы данных?');" method="post">{% csrf_token %}
+                <a href="delete_user/{{one_person.id}}">Удалить</a>
+                </form>
+            </td></tr>
+        {% endfor %}</tbody>
+    </table>
+   <div class="pagination" style="margin-left:70%">
+    <span class="step-links" align="center">
+        {% if all_users_page.has_previous %}
+            <a href="?page={{ all_users_page.previous_page_number }}">Предыдущая</a>
+        {% endif %}
+
+        <span class="current">
+            Страница {{ all_users_page.number }} из {{ all_users_page.paginator.num_pages }}
+        </span>
+
+        {% if all_users_page.has_next %}
+            <a href="?page={{ all_users_page.next_page_number }}">Следующая</a>
+        {% endif %}
+    </span>
+</div>
+    <br><br>
+</div>
+<!-- Изменение информации -->
+<div class="modal fade" id="changeModal" tabindex="-1" aria-labelledby="changeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeModalLabel">Изменить данные пользователя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="" method="post" name="changeShip" id="changeShip">{% csrf_token %}
+                     {% for person_change in change %}
+                <input type="text" name="first_name_change_person" value="{{ person_change.first_name }}" required><br><br>
+                <input  type="text" name="secondname_change_person" value="{{ person_change.second_name }}" required><br><br>
+                    <label>Тип</label>&nbsp;
+                     <select name="type_change_person">
+                         {% if person_change.type == 'admin' %}
+                         <option value="user">Логист</option>
+                        <option value="admin" selected>Админ</option>
+                         <option value="creator">Создатель</option>
+                         {% endif %}
+                         {% if person_change.type == 'user' %}
+                        <option value="user" selected>Логист</option>
+                        <option value="admin" >Админ</option>
+                         <option value="creator">Создатель</option>
+                         {% endif %}
+                         {% if person_change.type == 'creator' %}
+                        <option value="user" >Логист</option>
+                        <option value="admin" >Админ</option>
+                         <option value="creator"selected>Создатель</option>
+                         {% endif %}
+                    </select><br><br>
+
+                    <br><br>
+                        {% endfor %}
+                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary" form="changeShip" name="changeButton">Применить</button>
+                </div></div>
+
+</div>
+</div>
+
+
+<script>
+let arr_num = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+let arr_en = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+let arr_EN = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+let arr_symb = ['!', '@', '#', '$', '%', '?', '-', '+', '=', '~'];
+const compareRandom = ( ) => Math.random() - 0.5;
+
+const randomInteger = ( min, max ) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
+function generatePassword() {
+    let arr = [];
+    arr = arr.concat(arr_num);
+    arr = arr.concat(arr_en);
+    arr = arr.concat(arr_EN);
+    arr = arr.concat(arr_symb);
+
+    arr.sort(compareRandom);
+
+    let password = '';
+    let passLenght = 10;
+
+    for (let i = 0; i < passLenght; i++) {
+        password += arr[randomInteger(0, arr.length - 1)];
+    }
+
+    document.querySelector('#result').value = password;
+}
+
+document.querySelector('#pass_start').addEventListener('click', generatePassword);
+</script>
+{% endblock %}

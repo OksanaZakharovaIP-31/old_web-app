@@ -1,0 +1,77 @@
+{% extends "user/sample.html" %}
+
+{% block title %}
+Карта
+{% endblock %}
+
+{% block name %}
+<div class="dropdown" style="float:right;">
+<p  class="USER">
+    {% for name in person %}
+{{ name.name }} &nbsp;<img src="{{ name.photo.url }}" alt="no photo" width="40" height="40" >
+    {% endfor %}
+</p>
+    <div class="dropdown-content">
+        <a href="{% url 'change' %}"> Редактировать </a>
+        {% for i in person %}
+        {% if i.type == 'user' %}
+        <a href="{% url 'user' %}"> Судна </a>
+        {% endif %}
+        {% if i.type == 'admin' %}
+        <a href="{% url 'admin' %}"> Судна </a>
+        {% endif %}
+        {% if i.type == 'creator' %}
+        <a href="{% url 'creator_vessels' %}"> Судна </a>
+        <a href="{% url 'creator_users' %}"> Пользователи </a>
+        {% endif %}
+        {% endfor %}
+        <a href="{% url 'main' %}"> Выход </a>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div hidden="true">
+     {% for vessel in coord %}
+    <input type="text" value="{{ vessel.latitude }}" id="lat" >
+    <input type="text" value="{{ vessel.longitude }}" id="lon">
+    <input type="text" value="{{ vessel.icon.url }}" id="icon">
+    <input type="text" value = "{{ speed }}" id="speed">
+    <input type="text" value="{{ port }}" id="port">
+
+    {% endfor %}
+</div>
+<div id = "map" style = "width:900px; height:580px;margin-left:20%; margin-top:3%">
+
+</div>
+<script>
+var lat = Number(document.querySelector('#lat').value)
+var lon = Number(document.querySelector('#lon').value)
+var my_icon = document.querySelector('#icon').value
+var speed = document.querySelector('#speed').value
+var port = document.querySelector('#port').value
+        var mapOptions = {
+            center: [lat, lon],
+            zoom: 10
+         }
+
+         // Creating a map object
+         var map = new L.map('map', mapOptions);
+
+         // Creating a Layer object
+         var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+         // Adding layer to the map
+         map.addLayer(layer);
+         var iconOptions = {
+            iconUrl: my_icon,
+            iconSize: [20, 20]
+         }
+         var customIcon = L.icon(iconOptions);
+         var markerOptions = {
+            icon: customIcon
+         }
+         var marker = L.marker([lat, lon], markerOptions);
+         marker.bindPopup('Долгота: ' +lat+"<br />"+'Широта: '+lon+"<br />"+'Скорость: '+speed+"<br />"+'Пункт назначения: '+port).openPopup();
+         marker.addTo(map);
+    </script>
+{% endblock %}

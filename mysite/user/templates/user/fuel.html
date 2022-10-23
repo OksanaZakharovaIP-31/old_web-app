@@ -1,0 +1,108 @@
+{% extends "user/sample.html" %}
+
+{% block title %}
+Расчет количества топлива
+{% endblock %}
+
+{% block name %}
+<div class="dropdown" style="float:right;">
+<p  class="USER">
+    {% for name in person %}
+{{ name.name }} &nbsp;<img src="{{ name.photo.url }}" alt="no photo" width="40" height="40" >
+    {% endfor %}
+</p>
+    <div class="dropdown-content">
+        <a href="{% url 'change' %}"> Редактировать </a>
+        {% for i in person %}
+        {% if i.type == 'user' %}
+        <a href="{% url 'user' %}"> Судна </a>
+        {% endif %}
+        {% if i.type == 'admin' %}
+        <a href="{% url 'admin' %}"> Судна </a>
+        {% endif %}
+        {% if i.type == 'creator' %}
+        <a href="{% url 'creator_vessels' %}"> Судна </a>
+        <a href="{% url 'creator_users' %}"> Пользователи </a>
+        {% endif %}
+        {% endfor %}
+        <a href="{% url 'main' %}"> Выход </a>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<!-- Модальное окно для расчета количества топлива --->
+<div class="modal fade" id="rasschetModal" tabindex="-1" aria-labelledby="rasschetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rasschetModalLabel">Нужное количество топлива</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                   <p id="result"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >Закрыть</button>
+
+                </div>
+        </div>
+    </div>
+</div>
+<div style=" width: 50% height: 50%;margin-left:5%"><br><br>
+    <form action="" method="post" name="How_need" id="How_need">{% csrf_token %}</form>
+        {% for const in fuel_constant %}
+        <p style="float:left;">
+<label>Удельный расход топлива главным двигателем по заданной мощности</label> &nbsp;<br>
+    <input type="text" name="b_r" id="b_r" value="{{ const.b_r }}" required form="How_need"><br><br>
+         <label>Удельный расход топлива на работу вспомогательных механизмов</label> &nbsp;<br>
+    <input type="text" name="b_b" id="b_b" value="{{ const.b_b }}" required form="How_need"><br><br>
+            <label>Удельный расход топлива на стояночных и маневровых режимах <br>по построечной мощности</label> &nbsp;<br>
+    <input type="text" name="b_c" id="b_c" value="{{ const.b_c }}" required form="How_need"><br><br>
+            <label >Построечная мощность главного двигателя</label> &nbsp;<br>
+    <input type="text" name="N" id="N" value="{{ const.N }}" required form="How_need"><br><br>
+            <label>Плановая грузоподъемность</label> &nbsp;<br>
+    <input type="text" name="Q" id="Q" value="{{ const.Q }}" required form="How_need"><br><br>
+            <label>Заданная чистая техническая скорость (узлов)</label> &nbsp;<br>
+    <input type="text" name="V" id="V" value="{{ const.V }}" required form="How_need"><br><br>
+        </p>
+    <p style="float: left; width: 50 height: 50%;margin-right:5%">
+<label>Коэффициент использования построечной мощности</label> &nbsp;<br>
+    <input type="text"  name="C" id="C" value="{{ const.C }}" required form="How_need"><br><br>
+        <label>Коэффициент стояночного времени</label> &nbsp;<br>
+    <input type="text"  name="K" id="K" value="{{ const.K }}" required form="How_need"><br><br>
+        <label>Коэффициент снижения заданной технической скорости, <br>учитывающий планируемые условия эксплуатации</label> &nbsp;<br>
+    <input type="text"  name="X" id="X" value="{{ const.X }}" required form="How_need"><br><br>
+        <label>Коэффициент влияния на норму прочих, неучтенных факторов</label> &nbsp;<br>
+    <input type="text"  name="E" id="E" value="{{ const.E }}" required form="How_need"><br><br>
+        <input type="number" name="distans" id="distans"  placeholder="Расстояние в милях" required><br><br>
+        <input type="number" name="cleans" id="cleans"  placeholder="Чистая грузоподъемность" required><br><br>
+    </p>
+    {% endfor %}
+    </div>
+<br>
+<div style="float:right;margin-right:3%">
+    <button type="button" name="save_change" class="btn btn-primary" id="passchet" data-bs-toggle="modal" data-bs-target="#rasschetModal">
+        Рассчитать количество топлива</button>
+    <br><br>
+    <button type="submit" name="save_change" class="btn btn-primary" form="How_need">Сохранить изменения</button>
+</div>
+<script>
+function fuel(){
+let b_b = Number(document.querySelector('#b_b').value);
+let b_r = Number(document.querySelector('#b_r').value);
+let b_c = Number(document.querySelector('#b_c').value);
+let C = Number(document.querySelector('#C').value);
+let K = Number(document.querySelector('#K').value);
+let N = Number(document.querySelector('#N').value);
+let Q = Number(document.querySelector('#Q').value);
+let V = Number(document.querySelector('#V').value);
+let X = Number(document.querySelector('#X').value);
+let E = Number(document.querySelector('#E').value);
+let dist = Number(document.querySelector('#distans').value);
+let cl = Number(document.querySelector('#cleans').value);
+let how = (((N*(C*b_r+b_b+(K*b_c)/N)*E)/(cl*V*(1-X)))*Q*dist)/1000;
+document.querySelector('#result').textContent = how;
+}
+    document.querySelector('#passchet').addEventListener('click',fuel)
+</script>
+{% endblock %}

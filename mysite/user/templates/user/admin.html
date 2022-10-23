@@ -1,0 +1,195 @@
+{% extends "user/sample.html" %}
+
+{% block title %}
+Главная страница
+{% endblock %}
+
+{% block name %}
+<div class="dropdown" style="float:right;">
+<p  class="USER">
+    {% for name in user_name %}
+{{ name.name }} &nbsp;<img src="{{ name.photo.url }}" alt="no photo" width="40" height="40" >
+    {% endfor %}
+</p>
+    <div class="dropdown-content">
+        <a href="{% url 'change' %}"> Редактировать </a>
+        <a href="{% url 'admin' %}"> Судна </a>
+        <a href="{% url 'main' %}"> Выход </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div align="center" style="margin-top:15px">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#findModal">Поиск</button>
+
+<div class="modal fade" id="findModal" tabindex="-1" aria-labelledby="findModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="findModalLabel">Поиск</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="" method="post" id="Filter" name="Filter"> {% csrf_token %}
+                        <input type="text" name="find_name" placeholder="Название"><br><br>
+                        <input id="number" type="number" name="IMO_find" placeholder="IMO" max="9999999">
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >Закрыть</button>
+                    <button type="submit" class="btn btn-primary" form="Filter" name="find_ship">Применить</button>
+                </div>
+        </div>
+    </div>
+</div>
+
+<!-- Поиск-->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal" style="margin-left:30px">Фильтр</button>
+
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Фильтр</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="" method="post" id="Find" name="Find"> {% csrf_token %}
+                <input type="text" name="name_filter" placeholder="Название"><br><br>
+                    <input id="number_filter" type="number" name="IMO_filter" placeholder="IMO" max="9999999"><br><br>
+                     <select class="form-select" name="type_filter[]"  size="5" multiple>
+                        {% for one_type in all_type %}
+                        <option value="{{ one_type.type }}">{{ one_type.type }}</option>
+                       {% endfor %}
+                    </select>
+                     </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >Закрыть</button>
+                    <button type="submit" class="btn btn-primary" form="Find" name="filter_button">Применить</button>
+                </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Добавить судно -->
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal" style="margin-left:30px">Добавить судно</button>
+
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Новое судно</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="" method="post" name="AddShip" id="AddShip" enctype="multipart/form-data">{% csrf_token %}
+                <input type="text" name="name_add_ship" placeholder="Название" required><br><br>
+                <input  type="number" name="IMO_add_ship" placeholder="IMO" min="1000000" max="9999999" ><br><br>
+                        <input type="text" name="name_in_en" placeholder="Название на английском" required title="Название на английском языке, только большими буквами, пробелы заменить нижним подчеркиванием"><br><br>
+                    <label>Тип</label>&nbsp;
+                     <select name="type_add_ship">
+                        {% for one_type in all_type %}
+                        <option value="{{ one_type.type }}">{{ one_type.type }}</option>
+                       {% endfor %}
+                    </select><br><br>
+                    <label>Пользователь</label>&nbsp;
+                     <select name="user_add_ship" >
+                        {% for one_person in all_users %}
+                         {% if one_person.type == 'user' %}
+                        <option value="{{ one_person.name }}">{{ one_person.name }}</option>
+                         {% endif %}
+                       {% endfor %}
+                    </select>
+                    <!-- Загрузка изображения -->
+                    <br><br>
+                        <input type="file" name="photo" accept="image/jpeg"><br><br>
+                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary" form="AddShip" name="AddShipButton">Применить</button>
+                </div></div>
+            <!-- Добваить новый вид судна -->
+
+</div>
+</div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModalName" style="margin-left:30px">Добавить вид судна</button>
+
+        <div class="modal fade" id="addModalName" tabindex="-1" aria-labelledby="findModalLabelName" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="AddType" method="POST" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabelName">Новый вид судна</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                        {% csrf_token %}
+                        <input type="text" name="New_type" placeholder="Вид" oninput="this.value=this.value.replace(/[^а-яА-Яa-zA-Z]/g,'');"><br><br>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary" name="AddTypeButton">Добавить</button>
+                </div>
+        </div>
+        </form>
+    </div>
+        </div>
+<br><br>
+
+<div>
+    <table class="table table-bordered table-hover" border="2" style="background: #E6E6FA; margin-left: 5%; width:50%">
+        <caption align="top" style="color: black">Список судов</caption>
+        <thead>
+        <tr><td>Название</td><td>Вид</td><td>Изображение</td><td>IMO</td><td>Логист</td></tr></thead><tbody>
+        {% for ship in all_ship_page %}
+        <tr><td>{{ ship.name }}</td>
+            {% for j in all_type %}
+            {% if ship.type_id == j.id %}
+            <td>{{ j.type }}</td>
+            {% endif %}
+            {% endfor %}
+            <td><img src="{{ ship.photo.url }}" alt="no photo" width="150" height="150"></td>
+            <td>{{ ship.IMO }}</td>
+            {% for j in all_users %}
+            {% if ship.user_id == j.id %}
+            <td><a href="show_vessels/{{ j.id }}" target="_blank">{{ j.name }}</a></td>
+            {% endif %}
+            {% endfor %}
+            <td><a href="/map/{{ship.id}}/{{ship.IMO}}/{{ship.name_in_en}}">Показать на карте</a></td>
+            <td><a href="/fuel/{{ ship.id }}" target="_blank">Количество топлива</a></td>
+            <td><a href="change_vessels/{{ ship.id }}">Изменить</a>
+            </td>
+
+        <td>
+            <form onclick="return confirm('Вы точно хотите удалить запись из таблицы данных?');" method="post">{% csrf_token %}
+                <a href="delete_vessels/{{ship.id}}">Удалить</a>
+        </form>
+        </td></tr>
+        {% endfor %}</tbody>
+    </table>
+
+        {% if all_ship_page.has_previous %}
+            <a href="?page={{ all_ship_page.previous_page_number }}">Предыдущая</a>
+        {% endif %}
+
+        <span class="current">
+            Страница {{ all_ship_page.number }} из {{ all_ship_page.paginator.num_pages }}
+        </span>
+
+        {% if all_ship_page.has_next %}
+            <a href="?page={{ all_ship_page.next_page_number }}">Следующая</a>
+        {% endif %}
+    </span><br><br><br>
+</div>
+</div>
+</div>
+</div><br><br><br><br>
+<br><br><br><br>
+{% endblock %}

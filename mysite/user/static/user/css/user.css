@@ -1,0 +1,74 @@
+body {
+background: linear-gradient(to right,#87CEFA, #979AAA);
+margin: 2% auto ;
+weight:100%
+height: 100%
+font: bold italic  Verdana, sans-serif;
+
+}
+div.Header{border-bottom: solid 1px;
+height: 50px}
+
+div.Header p.NameOfSite {
+font-size: 200%;
+margin-top:2%;
+margin-bottom:1%;
+font-style: normal;
+text-transform: uppercase;
+text-align: center;
+}
+
+div p.main{
+font-size: 140%;
+margin-top:2%;
+margin-bottom:1%;
+font-style: normal;
+text-align: center;
+}
+div p.enter a.forget {
+display: block;
+color: 	#DDA0DD;
+margin-right: 15%;
+margin-top:-1.6%
+
+}
+div p.enter a.forget:hover{
+color: #1E90FF;
+}
+
+th, td {
+border-style: solid;
+border:5px;
+border-color: black;}
+
+
+div p.USER{
+font-size: 200%;
+float:right;
+margin-right:50px;
+font:bold italic large Gill Sans, sans-serif;
+margin-top:5px;
+height:40px;
+cursor: pointer;
+}
+div.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+.dropdown-content a:hover {background-color: #ddd;}
+.dropdown:hover .dropdown-content {display: block;}
+.label{font: bold italic  Verdana, sans-serif;}

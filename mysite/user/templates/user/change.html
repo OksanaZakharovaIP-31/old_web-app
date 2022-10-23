@@ -1,0 +1,50 @@
+{% extends "user/sample.html" %}
+
+{% block title %}
+Страница редактирования
+{% endblock %}
+
+{% block name %}
+<div class="dropdown" style="float:right;">
+<p  class="USER">
+    {% for name in person %}
+{{ name.name }} &nbsp;<img src="{{ name.photo.url }}" alt="no photo" width="40" height="40" >
+    {% endfor %}
+</p>
+    <div class="dropdown-content">
+        <a href="{% url 'change' %}"> Редактировать </a>
+        {% for i in person %}
+        {% if i.type == 'user' %}
+        <a href="{% url 'user' %}"> Судна </a>
+        {% endif %}
+        {% if i.type == 'admin' %}
+        <a href="{% url 'admin' %}"> Судна </a>
+        {% endif %}
+        {% if i.type == 'creator' %}
+        <a href="{% url 'creator_vessels' %}"> Судна </a>
+        <a href="{% url 'creator_users' %}"> Пользователи </a>
+        {% endif %}
+        {% endfor %}
+        <a href="{% url 'main' %}"> Выход </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div style="margin-left:45%; margin-top:5%">
+    {% for person_content in person %}
+    <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+        <label style="margin-left:-9.5%"> Фамилия</label> &nbsp;
+    <input type="text" name="first_name" value="{{ person_content.first_name }}" required><br><br>
+        <label style="margin-left:-15.5%"> Имя и Отчество</label> &nbsp;
+    <input type="text"  name="second_name" value="{{ person_content.second_name }}" required><br><br>
+    <input type="password" name="password" placeholder="Пароль"><br><br>
+    <!--  Загрузка фотографи  -->
+        <input type="file" name="photo" value="{{ person_content.photo }}" accept="image/jpeg"><br><br>
+        <button type="submit" name="save_change" class="btn btn-primary">Сохранить изменения</button>
+    </form>
+    {% endfor %}
+</div>
+
+    
+{% endblock %}

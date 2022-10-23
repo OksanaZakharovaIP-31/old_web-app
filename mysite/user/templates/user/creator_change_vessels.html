@@ -1,0 +1,59 @@
+{% extends "user/sample.html" %}
+{% load static %}
+{% block title %}
+Редактирование
+{% endblock %}
+
+{% block name %}
+<div class="dropdown" style="float:right;">
+<p  class="USER">
+    {% for name in user_name %}
+{{ name.name }} &nbsp;<img src="{{ name.photo.url }}" alt="no photo" width="40" height="40" >
+    {% endfor %}
+</p>
+
+    <div class="dropdown-content">
+        <a href="{% url 'change'  %}"> Редактировать </a>
+        <a href="{% url 'creator_vessels' %}"> Судна </a>
+        <a href="{% url 'creator_users' %}"> Пользователи </a>
+        <a href="{% url 'main' %}"> Выход </a>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+
+<div style="margin-left:45%; margin-top:2%">
+    {% for ship_change in change %}
+    <form method="post">
+        {% csrf_token %}
+        <label style="margin-left:-10%">Название</label>&nbsp;
+                <input type="text" name="name_change_ship" placeholder="Название" value="{{ ship_change.name }}"><br><br>
+        <label style="margin-left:-5.5%">IMO</label>&nbsp;
+                <input  type="number" name="IMO_change_ship" placeholder="IMO" min="0" max="9999999" value="{{ ship_change.IMO }}"><br><br>
+                    <label style="margin-left:-5.3%">Тип</label>&nbsp;
+                     <select name="type_change_ship">
+                         {% for one_type in all_type %}
+                         {% if ship_change.type_id == one_type.id %}
+                        <option value="{{ one_type.type }}" selected>{{ one_type.type }}</option>
+                         {% else %}
+                         <option value="{{ one_type.type }}">{{ one_type.type }}</option>
+                         {% endif %}
+                         {% endfor %}
+                    </select><br><br>
+                    <label style="margin-left:-14%">Пользователь</label>&nbsp;
+                     <select name="user_change_ship">
+                        {% for one_person in all_users %}
+                         {% if ship_change.user_id == one_person.id %}
+                        <option value="{{ one_person.name }}" selected>{{ one_person.name }}</option>
+                         {% elif one_person.type == 'user' %}
+                         <option value="{{ one_person.name }}">{{ one_person.name }}</option>
+                         {% endif %}
+                       {% endfor %}
+                    </select>{% endfor %}
+        <br><br>
+        <button class="btn btn-primary" name="changeButton" type="submit" >Сохранить изменения</button>&nbsp;&nbsp;
+        <button name="close" type="submit" class="btn btn-secondary">Назад</button>
+        </form>
+</div>
+
+{% endblock %}
