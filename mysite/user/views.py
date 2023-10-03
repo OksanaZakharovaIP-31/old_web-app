@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.datastructures import MultiValueDictKeyError
 import hashlib
+from .forms import Entry
 
 
 # Create your views here.
@@ -13,26 +14,30 @@ import hashlib
 
 def index(request):
     if request.method == 'POST':
-        login = request.POST.get('login')
-        check_password = request.POST.get('password')
-        h2 = hashlib.md5(check_password.encode())
-        check_password = h2.hexdigest()
-        user = Person.objects.filter(login=login).filter(password=check_password).count()
-        user_type = Person.objects.filter(login=login).filter(password=check_password)
-        if user == 0:
-            return render(request, 'user/index.html')
-        else:
-            if user_type.filter(type='user'):
-                request.session['login'] = login
-                return HttpResponseRedirect('/user/')
-
-            elif user_type.filter(type='admin'):
-                request.session['login'] = login
-                return HttpResponseRedirect('/Administrator/')
+        form = Entry(request.POST)
+        if form.is_valid():
+            login = request.POST.get('login')
+            check_password = request.POST.get('password')
+            h2 = hashlib.md5(check_password.encode())
+            check_password = h2.hexdigest()
+            user = Person.objects.filter(login=login).filter(password=check_password).count()
+            user_type = Person.objects.filter(login=login).filter(password=check_password)
+            if user == 0:
+                return render(request, 'user/index.html')
             else:
-                request.session['login'] = login
-                return HttpResponseRedirect('/creator/')
-    return render(request, 'user/index.html')
+                if user_type.filter(type='user'):
+                    request.session['login'] = login
+                    return HttpResponseRedirect('/user/')
+
+                elif user_type.filter(type='admin'):
+                    request.session['login'] = login
+                    return HttpResponseRedirect('/Administrator/')
+                else:
+                    request.session['login'] = login
+                    return HttpResponseRedirect('/creator/')
+    else:
+        form = Entry()
+    return render(request, 'user/index.html', {'form': form})
 
 
 def user(request):
