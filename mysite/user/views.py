@@ -6,10 +6,54 @@ from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.datastructures import MultiValueDictKeyError
 import hashlib
-from .forms import Entry, FindVessel, FilterVessel
+from .forms import Entry, FindVessel, FilterVessel, AddType
 
 
 # Create your views here.
+
+def find_vessels(request, vessels, form_find_vessel):
+    if form_find_vessel.is_valid():
+        find_name = form_find_vessel.cleaned_data.get('find_name')
+        find_IMO = form_find_vessel.cleaned_data.get('IMO')
+        if find_name != '':
+            vessels = vessels.filter(name__contains=find_name)
+            if find_IMO is not None:
+                vessels = vessels.filter(IMO__contains=find_IMO)
+        else:
+            if find_IMO is not None:
+                vessels = vessels.filter(IMO__contains=find_IMO)
+    return vessels
+
+
+def filter_vessels(request, vessels, filter_form):
+    if filter_form.is_valid():
+        type_filter = request.POST.get('type_filter[]')
+        name_filter = filter_form.cleaned_data.get('name')
+        IMO_filter = filter_form.cleaned_data.get('IMO')
+        if name_filter != '':
+            vessels = vessels.filter(name__contains=name_filter)
+            if IMO_filter is not None:
+                vessels = vessels.filter(IMO__contains=IMO_filter)
+            if type_filter:
+                vessels = vessels.filter(type__type__in=type_filter)
+
+        else:
+            if IMO_filter is not None:
+                vessels = vessels.filter(IMO__contains=IMO_filter)
+                if type_filter:
+                    vessels = vessels.filter(type__type__in=type_filter)
+            else:
+                if type_filter:
+                    vessels = vessels.filter(type__type__in=type_filter)
+    return vessels
+
+def add_type_vessel(add_type_form):
+    new_type = add_type_form.cleaned_data.get('type')
+    try:
+        Type.objects.get(type=new_type)
+    except Type.DoesNotExist:
+        type_new = Type(type=new_type)
+        type_new.save()
 
 
 def index(request):
@@ -61,46 +105,10 @@ def user(request):
     if request.method == 'POST':
         if 'find_ship' in request.POST:
             form_find_vessel = FindVessel(request.POST)
-            if form_find_vessel.is_valid():
-                find_name = form_find_vessel.cleaned_data.get('find_name')
-                find_IMO = form_find_vessel.cleaned_data.get('IMO')
-                if find_name != '':
-                    vessels = vessels.filter(name__contains=find_name)
-                    if find_IMO is not None:
-                        vessels = vessels.filter(IMO__contains=find_IMO)
-                else:
-                    if find_IMO is not None:
-                        vessels = vessels.filter(IMO__contains=find_IMO)
-            paginator = Paginator(vessels, 5)
-            page = request.GET.get('page')
-            try:
-                all_ship_page = paginator.page(page)
-            except PageNotAnInteger:
-                all_ship_page = paginator.page(1)
-            except EmptyPage:
-                all_ship_page = paginator.page(paginator.num_pages)
+            vessels = find_vessels(request, vessels, form_find_vessel)
         if 'filter_button' in request.POST:
             filter_form = FilterVessel(request.POST)
-            if filter_form.is_valid():
-                type_filter = request.POST.get('type_filter[]')
-                name_filter = filter_form.cleaned_data.get('name')
-                IMO_filter = filter_form.cleaned_data.get('IMO')
-
-                if name_filter != '':
-                    vessels = vessels.filter(name__contains=name_filter)
-                    if IMO_filter is not None:
-                        vessels = vessels.filter(IMO__contains=IMO_filter)
-                    if type_filter:
-                        vessels = vessels.filter(type__type__in=type_filter)
-
-                else:
-                    if IMO_filter is not None:
-                        vessels = vessels.filter(IMO__contains=IMO_filter)
-                        if type_filter:
-                            vessels = vessels.filter(type__type__in=type_filter)
-                    else:
-                        if type_filter:
-                            vessels = vessels.filter(type__type__in=type_filter)
+            vessels = filter_vessels(request, vessels, filter_form)
         paginator = Paginator(vessels, 5)
         page = request.GET.get('page')
         try:
@@ -123,6 +131,9 @@ def admin(request):
     if user_flag == 0:
         return HttpResponseRedirect('/')
     else:
+        form_find_vessel = FindVessel()
+        filter_form = FilterVessel()
+        add_type_form = AddType()
         user_name = Person.objects.filter(login=login)
         vessels = Vessels.objects.all()
         all_type = Type.objects.all().values()
@@ -139,14 +150,10 @@ def admin(request):
             all_ship_page = paginator.page(paginator.num_pages)
         if request.method == 'POST':
             if 'AddTypeButton' in request.POST:
-                new_type = request.POST.get('New_type')
-                try:
-                    type_new = Type.objects.get(type=new_type)
-                except Type.DoesNotExist:
-                    type_new = Type(type=new_type)
-                    type_new.save()
-                all_type = Type.objects.all().values()
-                return HttpResponseRedirect('/Administrator/')
+                add_type_form = AddType(request.POST)
+                if add_type_form.is_valid():
+                    add_type_vessel(add_type_form)
+                    return HttpResponseRedirect('/Administrator/')
             if 'AddShipButton' in request.POST:
                 name_ship = request.POST.get('name_add_ship')
                 IMO_ship = request.POST.get('IMO_add_ship')
@@ -203,55 +210,25 @@ def admin(request):
                             fuel.save()
                 return HttpResponseRedirect('/Administrator/')
             if 'find_ship' in request.POST:
-                find_name = request.POST.get('find_name')
-                find_IMO = request.POST.get('IMO_find')
-                if find_name != '':
-                    vessels = Vessels.objects.filter(name__contains=find_name)
-                    if find_IMO != '':
-                        vessels = vessels.filter(IMO__contains=find_IMO)
-                else:
-                    if find_IMO != '':
-                        vessels = Vessels.objects.filter(IMO__contains=find_IMO)
-                paginator = Paginator(vessels, 5)
-                page = request.GET.get('page')
-                try:
-                    all_ship_page = paginator.page(page)
-                except PageNotAnInteger:
-                    all_ship_page = paginator.page(1)
-                except EmptyPage:
-                    all_ship_page = paginator.page(paginator.num_pages)
+                form_find_vessel = FindVessel(request.POST)
+                vessels = find_vessels(request, vessels, form_find_vessel)
             if 'filter_button' in request.POST:
-                type_filter = request.POST.getlist('type_filter[]')
-                name_filter = request.POST.get('name_filter')
-                IMO_filter = request.POST.get('IMO_filter')
-                if name_filter != '':
-                    vessels = Vessels.objects.filter(name__contains=name_filter)
-                    if IMO_filter != '':
-                        vessels = vessels.filter(IMO__contains=IMO_filter)
-                    if type_filter:
-                        vessels = vessels.filter(type__type__in=type_filter)
-
-                else:
-                    if IMO_filter != '':
-                        vessels = Vessels.objects.filter(IMO__contains=IMO_filter)
-                        if type_filter:
-                            vessels = vessels.filter(type__type__in=type_filter)
-                    else:
-                        if type_filter:
-                            vessels = vessels.filter(type__type__in=type_filter)
-                paginator = Paginator(vessels, 5)
-                page = request.GET.get('page')
-                try:
-                    all_ship_page = paginator.page(page)
-                except PageNotAnInteger:
-                    all_ship_page = paginator.page(1)
-                except EmptyPage:
-                    all_ship_page = paginator.page(paginator.num_pages)
+                filter_form = FilterVessel(request.POST)
+                vessels = filter_vessels(request, vessels, filter_form)
+            paginator = Paginator(vessels, 5)
+            page = request.GET.get('page')
+            try:
+                all_ship_page = paginator.page(page)
+            except PageNotAnInteger:
+                all_ship_page = paginator.page(1)
+            except EmptyPage:
+                all_ship_page = paginator.page(paginator.num_pages)
         id_change = request.GET.get('id')
         change_change = Vessels.objects.filter(id=id_change)
     return render(request, 'user/admin.html', context={"vessels": vessels, 'all_type': all_type, 'all_users': all_users,
                                                        'user_name': user_name, 'all_ship_page': all_ship_page,
-                                                       'change': change_change}
+                                                       'change': change_change, 'form_find_vessel': form_find_vessel,
+                                                       'filter_form': filter_form, 'add_type_form': add_type_form}
                   )
 
     # return HttpResponseRedirect('')
@@ -732,7 +709,7 @@ def change_user_creator(request, id):
 
 
 def fuel(request, id):
-    login = login = request.session['login']
+    login = request.session['login']
     user_name = Person.objects.filter(login=login)
     fuel_constant = Fuel.objects.filter(vessels_id=id)
     if request.method == 'POST':

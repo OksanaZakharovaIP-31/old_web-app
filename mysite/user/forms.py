@@ -1,9 +1,12 @@
 from django.db.models import TextField
-
+from django.core.validators import RegexValidator
 from .models import Vessels, Person, Type
 from django import forms
 from django.forms import ModelForm, CharField, PasswordInput, TextInput, MultipleChoiceField, IntegerField, \
     CheckboxSelectMultiple, ModelChoiceField, ModelMultipleChoiceField
+
+
+AlphanumericValidator = RegexValidator(r'^[a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
 
 
 class Entry(ModelForm):
@@ -29,8 +32,15 @@ class FilterVessel(ModelForm):
     IMO = IntegerField(widget=forms.NumberInput(attrs={'type': 'number', 'placeholder': 'IMO', 'max_value': '9999999',
                                                        'min': '0', 'size': '40'}), label='', required=False)
 
-
-
     class Meta:
         model = Vessels
         fields = ['name', 'IMO']
+
+
+class AddType(ModelForm):
+
+    type = CharField(widget=forms.TextInput(attrs={'placeholder': 'Вид'}), validators=[AlphanumericValidator], label='')
+
+    class Meta:
+        model = Type
+        fields = ['type']

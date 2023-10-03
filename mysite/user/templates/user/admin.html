@@ -32,9 +32,10 @@
                 </div>
                 <div class="modal-body">
                     <form action="" method="post" id="Filter" name="Filter"> {% csrf_token %}
-                        <input type="text" name="find_name" placeholder="Название"><br><br>
+                        {{ form_find_vessel.as_p }}
+                        <!--<input type="text" name="find_name" placeholder="Название"><br><br>
                         <input id="number" type="number" name="IMO_find" placeholder="IMO" max="9999999">
-
+                        -->
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -57,8 +58,9 @@
                 </div>
                 <div class="modal-body">
                     <form action="" method="post" id="Find" name="Find"> {% csrf_token %}
-                <input type="text" name="name_filter" placeholder="Название"><br><br>
-                    <input id="number_filter" type="number" name="IMO_filter" placeholder="IMO" max="9999999"><br><br>
+                        {{ filter_form.as_p }}
+                <!--<input type="text" name="name_filter" placeholder="Название"><br><br>
+                    <input id="number_filter" type="number" name="IMO_filter" placeholder="IMO" max="9999999"><br><br>-->
                      <select class="form-select" name="type_filter[]"  size="5" multiple>
                         {% for one_type in all_type %}
                         <option value="{{ one_type.type }}">{{ one_type.type }}</option>
@@ -130,7 +132,8 @@
                 <div class="modal-body">
 
                         {% csrf_token %}
-                        <input type="text" name="New_type" placeholder="Вид" oninput="this.value=this.value.replace(/[^а-яА-Яa-zA-Z]/g,'');"><br><br>
+                    {{ add_type_form.as_p }}
+                        <!--<input type="text" name="New_type" placeholder="Вид" oninput="this.value=this.value.replace(/[^а-яА-Яa-zA-Z]/g,'');"><br><br>-->
 
                 </div>
                 <div class="modal-footer">
