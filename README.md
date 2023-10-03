@@ -86,7 +86,7 @@ my bachelor's diploma
   *Расчет топлива*
 </summary>
 
-![Расчет топлива](https://github.com/OksanaZakharovaIP-31/old_web-app/blob/main/pictures/%D1%80%D0%B0%D1%81%D1%87%D0%B5%D1%82%20%D1%82%D0%BE%D0%BF%D0%BB%D0%B8%D0%B2%D0%B0.gif "Расчет топлива")
+![Расчет топлива](https://github.com/OksanaZakharovaIP-31/old_web-app/blob/3198fc0d7a950da43de3f6f12f378f407cf70a7a/pictures/%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80%20%D0%B3%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BF%D0%B0%D1%80%D0%BE%D0%BB%D1%8F.gif "Расчет топлива")
 </details>
 
 <details><summary>
@@ -109,7 +109,7 @@ my bachelor's diploma
   *Главная страница администратора*
 </summary>
 
-![Главная страница администратора](https://github.com/OksanaZakharovaIP-31/old_web-app/blob/main/pictures/%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0%20%D0%B0%D0%B4%D0%BC%D0%B8%D0%BD%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B0.png.jpg "Главная страница администратора")</details>
+![Главная страница администратора](https://github.com/OksanaZakharovaIP-31/old_web-app/blob/3198fc0d7a950da43de3f6f12f378f407cf70a7a/pictures/%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0%20%D0%B0%D0%B4%D0%BC%D0%B8%D0%BD%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B0.jpg "Главная страница администратора")</details>
 <details><summary>
 
   *Добавление нового судна*
@@ -202,7 +202,7 @@ my bachelor's diploma
   *Генерация пароля*
 </summary>
 
-![Генерация пароля](https://github.com/OksanaZakharovaIP-31/old_web-app/blob/main/pictures/%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80%20%D0%B3%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8%20%D0%BF%D0%B0%D1%80%D0%BE%D0%BB%D1%8F.gif "Генерация пароля")
+![Генерация пароля](https://github.com/OksanaZakharovaIP-31/old_web-app/blob/3198fc0d7a950da43de3f6f12f378f407cf70a7a/pictures/%D1%80%D0%B0%D1%81%D1%87%D0%B5%D1%82%20%D1%82%D0%BE%D0%BF%D0%BB%D0%B8%D0%B2%D0%B0.gif "Генерация пароля")
 </details>
 </details>
 </details>
