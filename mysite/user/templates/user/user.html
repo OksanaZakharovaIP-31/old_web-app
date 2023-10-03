@@ -32,8 +32,9 @@
                 </div>
                 <div class="modal-body">
                     <form action="" method="post" id="Find" name="Find"> {% csrf_token %}
-                <input type="text" name="name_filter" placeholder="Название"><br><br>
-                    <input id="number_filter" type="number" name="IMO_filter" placeholder="IMO" max="9999999"><br><br>
+                        {{ filter_form.as_p }}
+                <!--<input type="text" name="name_filter" placeholder="Название"><br><br>
+                    <input id="number_filter" type="number" name="IMO_filter" placeholder="IMO" max="9999999"><br><br> -->
                      <select class="form-select" name="type_filter[]"  size="5" multiple>
                         {% for one_type in all_type %}
                         <option value="{{ one_type.type }}">{{ one_type.type }}</option>
@@ -59,8 +60,9 @@
                 </div>
                 <div class="modal-body">
                     <form action="" method="post" id="Filter" name="Filter"> {% csrf_token %}
-                        <input type="text" name="find_name" placeholder="Название"><br><br>
-                        <input id="number" type="number" name="IMO_find" placeholder="IMO" max="9999999">
+                        {{ form_find_vessel.as_p }}
+                        <!--<input type="text" name="find_name" placeholder="Название"><br><br>
+                        <input id="number" type="number" name="IMO_find" placeholder="IMO" max="9999999">-->
 
                     </form>
                 </div>
@@ -88,7 +90,7 @@
             {% endfor %}
             <td><img src="{{ ship.photo.url }}" alt="no photo" width="150" height="150" ></td>
             <td>{{ ship.IMO }}</td>
-            <td><a href="/map/{{ship.id}}/{{ship.IMO}}/{{ship.name_in_en}}">Показать на карте</a></td>
+            <td><a href="/map/{{ship.id}}/{{ship.IMO}}/{{ship.name_in_en}}" target="_blank">Показать на карте</a></td>
             <td><a href="/fuel/{{ ship.id }}" target="_blank">Количество топлива</a></td>
             </td>
         </tr>

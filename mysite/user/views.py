@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.datastructures import MultiValueDictKeyError
 import hashlib
-from .forms import Entry
+from .forms import Entry, FindVessel, FilterVessel
 
 
 # Create your views here.
@@ -45,57 +45,32 @@ def user(request):
     user_flag = Person.objects.filter(login=login).filter(type='user').count()
     if user_flag == 0:
         return HttpResponseRedirect('/')
-    else:
-        user_name = Person.objects.filter(login=login)
-        vessels = Vessels.objects.filter(user__login=login)
-        all_type = Type.objects.all().values()
-        paginator = Paginator(vessels, 5)
-        page = request.GET.get('page')
-        try:
-            all_ship_page = paginator.page(page)
-        except PageNotAnInteger:
-            all_ship_page = paginator.page(1)
-        except EmptyPage:
-            all_ship_page = paginator.page(paginator.num_pages)
-        if request.method == 'POST':
-            if 'find_ship' in request.POST:
-                find_name = request.POST.get('find_name')
-                find_IMO = request.POST.get('IMO_find')
+    form_find_vessel = FindVessel()
+    filter_form = FilterVessel()
+    user_name = Person.objects.filter(login=login)
+    vessels = Vessels.objects.filter(user__login=login)
+    all_type = Type.objects.all().values()
+    paginator = Paginator(vessels, 5)
+    page = request.GET.get('page')
+    try:
+        all_ship_page = paginator.page(page)
+    except PageNotAnInteger:
+        all_ship_page = paginator.page(1)
+    except EmptyPage:
+        all_ship_page = paginator.page(paginator.num_pages)
+    if request.method == 'POST':
+        if 'find_ship' in request.POST:
+            form_find_vessel = FindVessel(request.POST)
+            if form_find_vessel.is_valid():
+                find_name = form_find_vessel.cleaned_data.get('find_name')
+                find_IMO = form_find_vessel.cleaned_data.get('IMO')
                 if find_name != '':
                     vessels = vessels.filter(name__contains=find_name)
-                    if find_IMO != '':
+                    if find_IMO is not None:
                         vessels = vessels.filter(IMO__contains=find_IMO)
-                    else:
-                        if find_IMO != '':
-                            vessels = vessels.filter(IMO__contains=find_IMO)
-                paginator = Paginator(vessels, 5)
-                page = request.GET.get('page')
-                try:
-                    all_ship_page = paginator.page(page)
-                except PageNotAnInteger:
-                    all_ship_page = paginator.page(1)
-                except EmptyPage:
-                    all_ship_page = paginator.page(paginator.num_pages)
-            if 'filter_button' in request.POST:
-                type_filter = request.POST.getlist('type_filter[]')
-                name_filter = request.POST.get('name_filter')
-                IMO_filter = request.POST.get('IMO_filter')
-
-                if name_filter != '':
-                    vessels = vessels.filter(name__contains=name_filter)
-                    if IMO_filter != '':
-                        vessels = vessels.filter(IMO__contains=IMO_filter)
-                    if type_filter:
-                        vessels = vessels.filter(type__type__in=type_filter)
-
                 else:
-                    if IMO_filter != '':
-                        vessels = vessels.filter(IMO__contains=IMO_filter)
-                        if type_filter:
-                            vessels = vessels.filter(type__type__in=type_filter)
-                    else:
-                        if type_filter:
-                            vessels = vessels.filter(type__type__in=type_filter)
+                    if find_IMO is not None:
+                        vessels = vessels.filter(IMO__contains=find_IMO)
             paginator = Paginator(vessels, 5)
             page = request.GET.get('page')
             try:
@@ -104,9 +79,40 @@ def user(request):
                 all_ship_page = paginator.page(1)
             except EmptyPage:
                 all_ship_page = paginator.page(paginator.num_pages)
-        return render(request, 'user/user.html',
-                      context={"vessels": vessels, 'all_type': all_type, 'user_name': user_name,
-                               'all_ship_page': all_ship_page})
+        if 'filter_button' in request.POST:
+            filter_form = FilterVessel(request.POST)
+            if filter_form.is_valid():
+                type_filter = request.POST.get('type_filter[]')
+                name_filter = filter_form.cleaned_data.get('name')
+                IMO_filter = filter_form.cleaned_data.get('IMO')
+
+                if name_filter != '':
+                    vessels = vessels.filter(name__contains=name_filter)
+                    if IMO_filter is not None:
+                        vessels = vessels.filter(IMO__contains=IMO_filter)
+                    if type_filter:
+                        vessels = vessels.filter(type__type__in=type_filter)
+
+                else:
+                    if IMO_filter is not None:
+                        vessels = vessels.filter(IMO__contains=IMO_filter)
+                        if type_filter:
+                            vessels = vessels.filter(type__type__in=type_filter)
+                    else:
+                        if type_filter:
+                            vessels = vessels.filter(type__type__in=type_filter)
+        paginator = Paginator(vessels, 5)
+        page = request.GET.get('page')
+        try:
+            all_ship_page = paginator.page(page)
+        except PageNotAnInteger:
+            all_ship_page = paginator.page(1)
+        except EmptyPage:
+            all_ship_page = paginator.page(paginator.num_pages)
+    return render(request, 'user/user.html',
+                  context={"vessels": vessels, 'all_type': all_type, 'user_name': user_name,
+                           'all_ship_page': all_ship_page, 'form_find_vessel': form_find_vessel,
+                           'filter_form': filter_form})
 
     return HttpResponseRedirect('')
 
