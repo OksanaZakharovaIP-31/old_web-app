@@ -14,9 +14,10 @@
                 </div>
                 <div class="modal-body" align="center">
                     <form action="" method="post" id="Filter" name="Filter"> {% csrf_token %}
-                        <input type="text" name="find_name" placeholder="Название"><br><br>
+                      {{ form_find_vessel.as_p }}
+                       <!-- <input type="text" name="find_name" placeholder="Название"><br><br>
                         <input id="number" type="number" name="IMO_find" placeholder="IMO" max="9999999">
-
+-->
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -39,9 +40,11 @@
                 </div>
                 <div class="modal-body" align="center">
                     <form action="" method="post" id="Find" name="Find"> {% csrf_token %}
-                <input type="text" name="name_filter" placeholder="Название"><br><br>
+               {{ filter_form.as_p }}
+                <!--<input type="text" name="name_filter" placeholder="Название"><br><br>
                     <input id="number_filter" type="number" name="IMO_filter" placeholder="IMO" max="9999999"><br><br>
-                     <select class="form-select" name="type_filter[]"  size="5" multiple>
+                     -->
+                        <select class="form-select" name="type_filter[]"  size="5" multiple>
                         {% for one_type in all_type %}
                         <option value="{{ one_type.type }}">{{ one_type.type }}</option>
                        {% endfor %}
@@ -68,7 +71,8 @@
                 </div>
                 <div class="modal-body" align="center">
                     <form action="" method="post" name="AddShip" id="AddShip" enctype="multipart/form-data">{% csrf_token %}
-                <input type="text" name="name_add_ship" placeholder="Название"><br><br>
+                {{ add_vessel_form.as_p }}
+                        <!--<input type="text" name="name_add_ship" placeholder="Название"><br><br>
                 <input  type="number" name="IMO_add_ship" placeholder="IMO" min="1000000" max="9999999"><br><br>
                         <input type="text" name="name_in_en" placeholder="Название на английском" required><br><br>
                     <label>Тип</label>&nbsp;
@@ -84,7 +88,7 @@
                         <option value="{{ one_person.name }}">{{ one_person.name }}</option>
                          {% endif %}
                        {% endfor %}
-                    </select>
+                    </select>-->
                     <!-- Загрузка изображения -->
                     <br><br>
                         <input type="file" name="photo" value="{{ person_content.photo }}" accept="image/jpeg"><br><br>
@@ -112,8 +116,9 @@
                 <div class="modal-body" align="center">
 
                         {% csrf_token %}
-                        <input type="text" name="New_type" placeholder="Вид" oninput="this.value=this.value.replace(/[^а-яА-Яa-zA-Z]/g,'');"><br><br>
-
+                    {{ add_type_form.as_p }}
+                        <!--<input type="text" name="New_type" placeholder="Вид" oninput="this.value=this.value.replace(/[^а-яА-Яa-zA-Z]/g,'');"><br><br>
+                        -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
