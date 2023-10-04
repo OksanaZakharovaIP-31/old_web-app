@@ -3,10 +3,10 @@ from django.core.validators import RegexValidator
 from .models import Vessels, Person, Type
 from django import forms
 from django.forms import ModelForm, CharField, PasswordInput, TextInput, MultipleChoiceField, IntegerField, \
-    CheckboxSelectMultiple, ModelChoiceField, ModelMultipleChoiceField
+    CheckboxSelectMultiple, ModelChoiceField, ModelMultipleChoiceField, FileField
 
-
-AlphanumericValidator = RegexValidator(r'^[a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
+AlphaValidator = RegexValidator(r'^[а-яА-я]*$', 'Only alpha characters are allowed.')
+EnglishNameValidator = RegexValidator(r'^[A-Z_]*$', 'Only alpha without space characters are allowed.')
 
 
 class Entry(ModelForm):
@@ -38,9 +38,40 @@ class FilterVessel(ModelForm):
 
 
 class AddType(ModelForm):
-
-    type = CharField(widget=forms.TextInput(attrs={'placeholder': 'Вид'}), validators=[AlphanumericValidator], label='')
+    type = CharField(widget=forms.TextInput(attrs={'placeholder': 'Вид'}), validators=[AlphaValidator], label='')
 
     class Meta:
         model = Type
         fields = ['type']
+
+
+class AddVessel(ModelForm):
+    class Meta:
+        model = Vessels
+        fields = ['name', 'type', 'IMO', 'name_in_en', 'user']
+        labels = {
+            'user': 'Пользователь',
+            'name': '',
+            'type': 'Тип',
+            'IMO': '',
+            'name_in_en': '',
+            'photo': 'Фотография'
+        }
+        widgets = {
+            # 'user': ModelChoiceField(queryset=Person.objects.all(), attrs={'placeholder': 'Пользователь'}),
+            'name': TextInput(attrs={'placeholder': 'Название'}),
+            'IMO': forms.NumberInput(attrs={'type': 'number', 'placeholder': 'IMO', 'max_value': '9999999',
+                                            'min': '1000000'}),
+            'name_in_en': TextInput(attrs={'placeholder': 'Название на английском',
+                                           'title': "Название на английском языке, только большими буквами, пробелы "
+                                                    "заменить нижним подчеркиванием", }),
+            # 'type': 'Тип',
+            # 'IMO': '',
+            # 'name_in_en': '',
+            # 'photo': forms.ImageField()
+        }
+        validators = {
+            'name_in_en': [EnglishNameValidator]
+        }
+        required = {
+            'photo': False}

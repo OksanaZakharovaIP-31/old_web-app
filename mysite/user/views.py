@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.datastructures import MultiValueDictKeyError
 import hashlib
-from .forms import Entry, FindVessel, FilterVessel, AddType
+from .forms import Entry, FindVessel, FilterVessel, AddType, AddVessel
 
 
 # Create your views here.
@@ -47,6 +47,7 @@ def filter_vessels(request, vessels, filter_form):
                     vessels = vessels.filter(type__type__in=type_filter)
     return vessels
 
+
 def add_type_vessel(add_type_form):
     new_type = add_type_form.cleaned_data.get('type')
     try:
@@ -54,6 +55,36 @@ def add_type_vessel(add_type_form):
     except Type.DoesNotExist:
         type_new = Type(type=new_type)
         type_new.save()
+
+
+def add_vessel(add_vessel_form, photo):
+    name_ship = add_vessel_form.cleaned_data.get('name')
+    IMO_ship = add_vessel_form.cleaned_data.get('IMO')
+    type_ship = add_vessel_form.cleaned_data.get('type')
+    user_ship = add_vessel_form.cleaned_data.get('user')
+    name_in_en = add_vessel_form.cleaned_data.get('name_in_en')
+    try:
+        Vessels.objects.get(name=name_ship, IMO=IMO_ship)
+    except Vessels.DoesNotExist:
+        user_name_add_ship = Person.objects.get(name=user_ship)
+        ship_type = Type.objects.get(type=type_ship)
+        # try:
+        #     photo = add_vessel_form.cleaned_data['photo']
+        #     new_ship = Vessels(name=name_ship, IMO=IMO_ship, user=user_name_add_ship, type=ship_type,
+        #                        photo=photo.image, name_in_en=name_in_en)
+        # except MultiValueDictKeyError:
+        #     new_ship = Vessels(name=name_ship, IMO=IMO_ship, user=user_name_add_ship, type=ship_type,
+        #                        name_in_en=name_in_en)
+        if photo is not None:
+            new_ship = Vessels(name=name_ship, IMO=IMO_ship, user=user_name_add_ship, type=ship_type,
+                               photo=photo, name_in_en=name_in_en)
+        else:
+            new_ship = Vessels(name=name_ship, IMO=IMO_ship, user=user_name_add_ship, type=ship_type,
+                               name_in_en=name_in_en)
+    new_ship.save()
+    name_ship = Vessels.objects.get(name=name_ship)
+    fuel = Fuel(vessels=name_ship)
+    fuel.save()
 
 
 def index(request):
@@ -130,17 +161,46 @@ def admin(request):
     user_flag = Person.objects.filter(login=login).filter(type='admin').count()
     if user_flag == 0:
         return HttpResponseRedirect('/')
-    else:
-        form_find_vessel = FindVessel()
-        filter_form = FilterVessel()
-        add_type_form = AddType()
-        user_name = Person.objects.filter(login=login)
-        vessels = Vessels.objects.all()
-        all_type = Type.objects.all().values()
-        all_users = Person.objects.filter(type='user').values()
-        paginator = Paginator(Vessels.objects.all(), 5)
-        id_change = request.GET.get('id')
-        change_change = Vessels.objects.filter(id=id_change)
+    add_vessel_form = AddVessel()
+    form_find_vessel = FindVessel()
+    filter_form = FilterVessel()
+    add_type_form = AddType()
+    user_name = Person.objects.filter(login=login)
+    vessels = Vessels.objects.all()
+    all_type = Type.objects.all().values()
+    all_users = Person.objects.filter(type='user').values()
+    paginator = Paginator(Vessels.objects.all(), 5)
+    id_change = request.GET.get('id')
+    change_change = Vessels.objects.filter(id=id_change)
+    page = request.GET.get('page')
+    try:
+        all_ship_page = paginator.page(page)
+    except PageNotAnInteger:
+        all_ship_page = paginator.page(1)
+    except EmptyPage:
+        all_ship_page = paginator.page(paginator.num_pages)
+    if request.method == 'POST':
+        if 'AddTypeButton' in request.POST:
+            add_type_form = AddType(request.POST)
+            if add_type_form.is_valid():
+                add_type_vessel(add_type_form)
+            return HttpResponseRedirect('/Administrator/')
+        if 'AddShipButton' in request.POST:
+            add_vessel_form = AddVessel(request.POST, request.FILES)
+            if add_vessel_form.is_valid():
+                try:
+                    photo = request.FILES['photo']
+                except MultiValueDictKeyError:
+                    photo = None
+                add_vessel(add_vessel_form, photo)
+            return HttpResponseRedirect('/Administrator/')
+        if 'find_ship' in request.POST:
+            form_find_vessel = FindVessel(request.POST)
+            vessels = find_vessels(request, vessels, form_find_vessel)
+        if 'filter_button' in request.POST:
+            filter_form = FilterVessel(request.POST)
+            vessels = filter_vessels(request, vessels, filter_form)
+        paginator = Paginator(vessels, 5)
         page = request.GET.get('page')
         try:
             all_ship_page = paginator.page(page)
@@ -148,87 +208,13 @@ def admin(request):
             all_ship_page = paginator.page(1)
         except EmptyPage:
             all_ship_page = paginator.page(paginator.num_pages)
-        if request.method == 'POST':
-            if 'AddTypeButton' in request.POST:
-                add_type_form = AddType(request.POST)
-                if add_type_form.is_valid():
-                    add_type_vessel(add_type_form)
-                    return HttpResponseRedirect('/Administrator/')
-            if 'AddShipButton' in request.POST:
-                name_ship = request.POST.get('name_add_ship')
-                IMO_ship = request.POST.get('IMO_add_ship')
-                type_ship = request.POST.get('type_add_ship')
-                user_ship = request.POST.get('user_add_ship')
-                name_in_en = request.POST.get('name_in_en')
-                if IMO_ship != '':
-                    try:
-                        new_ship = Vessels.objects.get(name=name_ship, IMO=IMO_ship)
-                    except Vessels.DoesNotExist:
-                        user_name_add_ship = Person.objects.get(name=user_ship)
-                        ship_type = Type.objects.get(type=type_ship)
-                        try:
-                            photo = request.FILES['photo']
-                            new_ship = Vessels(name=name_ship, IMO=IMO_ship, user=user_name_add_ship, type=ship_type,
-                                               photo=photo, name_in_en=name_in_en)
-                            new_ship.save()
-                            name_ship = Vessels.objects.get(name=name_ship)
-                            fuel = Fuel(vessels=name_ship, b_r='0', b_b='0', b_c='0', N='0', Q='0', V='0', C='0',
-                                        K='0', X='0', E='0')
-                            fuel.save()
-                        except MultiValueDictKeyError:
-                            new_ship = Vessels(name=name_ship, IMO=IMO_ship, user=user_name_add_ship, type=ship_type,
-                                               name_in_en=name_in_en)
-                            new_ship.save()
-                            name_ship = Vessels.objects.get(name=name_ship)
-                            fuel = Fuel(vessels=name_ship, b_r='0', b_b='0', b_c='0', N='0', Q='0', V='0', C='0',
-                                        K='0', X='0', E='0')
-                            fuel.save()
-                else:
-                    IMO_ship = 0
-                    try:
-                        new_ship = Vessels.objects.get(name=name_ship, IMO=IMO_ship)
-                    except Vessels.DoesNotExist:
-                        user_name_add_ship = Person.objects.get(name=user_ship)
-                        vessels = Vessels.objects.all().values()
-                        ship_type = Type.objects.get(type=type_ship)
-                        try:
-                            photo = request.FILES['photo']
-                            new_ship = Vessels(name=name_ship, IMO=IMO_ship, user=user_name_add_ship, type=ship_type,
-                                               photo=photo, name_in_en=name_in_en)
-                            new_ship.save()
-                            name_ship = Vessels.objects.get(name=name_ship)
-                            fuel = Fuel(vessels=name_ship, b_r='0', b_b='0', b_c='0', N='0', Q='0', V='0', C='0',
-                                        K='0', X='0', E='0')
-                            fuel.save()
-                        except MultiValueDictKeyError:
-                            new_ship = Vessels(name=name_ship, IMO=IMO_ship, user=user_name_add_ship, type=ship_type,
-                                               name_in_en=name_in_en)
-                            new_ship.save()
-                            name_ship = Vessels.objects.get(name=name_ship)
-                            fuel = Fuel(vessels=name_ship, b_r='0', b_b='0', b_c='0', N='0', Q='0', V='0', C='0',
-                                        K='0', X='0', E='0')
-                            fuel.save()
-                return HttpResponseRedirect('/Administrator/')
-            if 'find_ship' in request.POST:
-                form_find_vessel = FindVessel(request.POST)
-                vessels = find_vessels(request, vessels, form_find_vessel)
-            if 'filter_button' in request.POST:
-                filter_form = FilterVessel(request.POST)
-                vessels = filter_vessels(request, vessels, filter_form)
-            paginator = Paginator(vessels, 5)
-            page = request.GET.get('page')
-            try:
-                all_ship_page = paginator.page(page)
-            except PageNotAnInteger:
-                all_ship_page = paginator.page(1)
-            except EmptyPage:
-                all_ship_page = paginator.page(paginator.num_pages)
-        id_change = request.GET.get('id')
-        change_change = Vessels.objects.filter(id=id_change)
+    id_change = request.GET.get('id')
+    change_change = Vessels.objects.filter(id=id_change)
     return render(request, 'user/admin.html', context={"vessels": vessels, 'all_type': all_type, 'all_users': all_users,
                                                        'user_name': user_name, 'all_ship_page': all_ship_page,
                                                        'change': change_change, 'form_find_vessel': form_find_vessel,
-                                                       'filter_form': filter_form, 'add_type_form': add_type_form}
+                                                       'filter_form': filter_form, 'add_type_form': add_type_form,
+                                                       'add_vessel_form': add_vessel_form}
                   )
 
     # return HttpResponseRedirect('')

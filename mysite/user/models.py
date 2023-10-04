@@ -19,6 +19,9 @@ class Person(models.Model):
         if self.photo and hasattr(self.photo, 'url'):
             return self.photo.url
 
+    def __str__(self):
+        return self.name
+
 
 class Type(models.Model):
     type = models.CharField(max_length=50)
@@ -32,8 +35,8 @@ class Vessels(models.Model):
     name = models.CharField(max_length=100)
     photo = models.ImageField(default='img/ship/no-image.jpg', upload_to='img/ship')
     type = models.ForeignKey(Type, on_delete=models.PROTECT)
-    IMO = models.IntegerField()
-    name_in_en = models.CharField(max_length=300, default=name)
+    IMO = models.PositiveIntegerField()
+    name_in_en = models.CharField(max_length=300)
     latitude = models.CharField(max_length=100, default='0')
     longitude = models.CharField(max_length=100, default='0')
     icon = models.ImageField(default='img/icons/краснsй.png', upload_to='img/icons')
@@ -41,13 +44,13 @@ class Vessels(models.Model):
 
 class Fuel(models.Model):
     vessels = models.OneToOneField(Vessels, on_delete=models.CASCADE, primary_key=True)
-    b_r = models.CharField(max_length=50)
-    b_b = models.CharField(max_length=50)
-    b_c = models.CharField(max_length=50)
-    N = models.CharField(max_length=50)
-    Q = models.CharField(max_length=50)
-    V = models.CharField(max_length=50)
-    C = models.CharField(max_length=50)
-    K = models.CharField(max_length=50)
-    X = models.CharField(max_length=50)
-    E = models.CharField(max_length=50)
+    b_r = models.CharField(max_length=50, default='0')
+    b_b = models.CharField(max_length=50, default='0')
+    b_c = models.CharField(max_length=50, default='0')
+    N = models.CharField(max_length=50, default='0')
+    Q = models.CharField(max_length=50, default='0')
+    V = models.CharField(max_length=50, default='0')
+    C = models.CharField(max_length=50, default='0')
+    K = models.CharField(max_length=50, default='0')
+    X = models.CharField(max_length=50, default='0')
+    E = models.CharField(max_length=50, default='0')

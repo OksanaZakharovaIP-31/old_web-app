@@ -88,7 +88,8 @@
                 </div>
                 <div class="modal-body">
                     <form action="" method="post" name="AddShip" id="AddShip" enctype="multipart/form-data">{% csrf_token %}
-                <input type="text" name="name_add_ship" placeholder="Название" required><br><br>
+                {{ add_vessel_form.as_p }}
+                        <!--<input type="text" name="name_add_ship" placeholder="Название" required><br><br>
                 <input  type="number" name="IMO_add_ship" placeholder="IMO" min="1000000" max="9999999" ><br><br>
                         <input type="text" name="name_in_en" placeholder="Название на английском" required title="Название на английском языке, только большими буквами, пробелы заменить нижним подчеркиванием"><br><br>
                     <label>Тип</label>&nbsp;
@@ -104,11 +105,11 @@
                         <option value="{{ one_person.name }}">{{ one_person.name }}</option>
                          {% endif %}
                        {% endfor %}
-                    </select>
-                    <!-- Загрузка изображения -->
-                    <br><br>
+                    </select>-->
+                    <!-- Загрузка изображения
+                    <br><br>-->
                         <input type="file" name="photo" accept="image/jpeg"><br><br>
-                </form>
+                 </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
